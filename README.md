@@ -3,15 +3,14 @@
 **Heterophily-Aware Dual-Branch Graph Neural Network for Pan-Cancer Driver Gene Prioritisation**
 
 <p align="center">
-  <img src="figures/architecture.png" alt="HDGN-PDG Architecture" width="800"/>
+  <img src="ArchitectureDiagram.png" alt="HDGN-PDG Architecture" width="800"/>
 </p>
 
 <p align="center">
   <b>Figure 1.</b> HDGN-PDG architecture.
   <b>(a)</b> Multi-omics features (N × 64) and PPI network topology are processed by two parallel branches.
   <b>(b)</b> The ACM branch encodes four omics modalities via modality-specific projections, then applies Adaptive Channel Mixing convolution with low-pass, high-pass, and identity channels. The topology branch maps 7 z-normalised structural features through a two-layer MLP.
-  <b>(c)</b> A per-node GatedFusion module produces a sigmoid-gated interpolation: <i>g ⊙ h<sub>acm</sub> + (1 − g) ⊙ h<sub>topo</sub></i>.
-  <b>(d)</b> A classification head outputs per-gene driver probability.
+  <b>(c)</b> A per-node GatedFusion module produces a sigmoid-gated interpolation: (d)</b> A classification head outputs per-gene driver probability.
 </p>
 
 ---
@@ -30,12 +29,11 @@ Under 10 repetitions of 5-fold cross-validation across six PPI networks, HDGN-PD
 
 ```
 HDGN-PDG/
-├── hdgn_pdg.py              # Full model: training, evaluation, and cross-validation
+├── proposed_model_7_new_seedfix.py              # Full model: training, evaluation, and cross-validation
 ├── requirements.txt          # Pinned dependencies (exact versions used in the paper)
-├── figures/
-│   └── architecture.png      # Architecture diagram (Figure 1)
+├── ArchitectureDiagram.png      # Architecture diagram (Figure 1)
 ├── data/
-│   └── README.md             # Instructions for obtaining the dataset
+│   └── .pkl             # the dataset
 ├── LICENSE
 └── README.md
 ```
@@ -51,7 +49,6 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-The `requirements.txt` pins the exact versions used to produce results in the manuscript:
 
 ```
 torch==2.11.0
@@ -66,7 +63,7 @@ scipy==1.16.3
 ### Cross-validation (reproduce paper results)
 
 ```bash
-python hdgn_pdg.py --data data/dataset_MULTINET_ten_5CV.pkl --reps 10 --seed 42
+python proposed_model_7_new_seedfix.py --data data/dataset_MULTINET_ten_5CV.pkl --reps 10 --seed 42
 ```
 
 ### Key arguments
@@ -100,11 +97,15 @@ CROSS-VALIDATION SUMMARY
 
 ## Reproducibility
 
-Deterministic execution is enforced via `seed_everything()`, which sets `CUBLAS_WORKSPACE_CONFIG`, seeds Python/NumPy/PyTorch RNGs, enables `torch.use_deterministic_algorithms(True)`, and disables cuDNN auto-tuning. Results are bitwise reproducible on the same hardware and software configuration.
+The scripts of [proposed_model_7_new_seedfix.py](https://github.com/hdangle31/HDGN-PDG/blob/main/proposed_model_7_new_seedfix.py) can reproduce the comparison results, which can be done by the following commands, taking the PCNet network as an example:
+
+```bash
+python proposed_model_7_new_seedfix.py --seed 31 --data "dataset_PCNET_ten_5CV.pkl" --reps 10 --omics_dim 48 --hidden_dim 144 --n_layers 2 --temperature 2.0 --dropout 0.5 --weight_decay 0.0002421641899359393 --lr 0.0037975573394087546 --epochs 200 --patience 30
+```
 
 ## Data
 
-The dataset pickle file contains multi-omics features (mutation frequency, copy number alteration, methylation, and gene expression across 16 TCGA cancer types), PPI network edge indices, gene labels, and pre-defined cross-validation splits. See `data/README.md` for download instructions and preprocessing details.
+The dataset pickle file contains multi-omics features (mutation frequency, copy number alteration, methylation, and gene expression across 16 TCGA cancer types), PPI network edge indices, gene labels, and pre-defined cross-validation splits. Refer to [EMOGI](https://github.com/schulter/EMOGI) for full preprocessing details.
 
 ## Citation
 
